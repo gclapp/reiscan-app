@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REI Provider Scraper - Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .header-left h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .search-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .search-info span {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 16px;
+            margin-right: 8px;
+            font-weight: 500;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8f9ff;
+        }
+        
+        .stats-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .results-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .provider-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .provider-clinic {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .location {
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        .score {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+        
+        .score-high {
+            color: #28a745;
+        }
+        
+        .score-medium {
+            color: #ffc107;
+        }
+        
+        .score-low {
+            color: #dc3545;
+        }
+        
+        .stars {
+            color: #ffc107;
+        }
+        
+        .cigna-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .cigna-yes {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .cigna-no {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .cigna-unknown {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .specialties {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .specialty-tag {
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #555;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state h2 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-right {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            th, td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>🏥 Search Results</h1>
+                <div class="search-info">
+                    <span>State: {{ search_params.state }}</span>
+                    <span>Sources: {{ search_params.sources|join(', ') }}</span>
+                    {% if search_params.network %}
+                    <span>Network: {{ search_params.network }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="header-right">
+                <a href="/rei" class="btn btn-primary">🔄 New Search</a>
+                <a href="/" class="btn btn-secondary">← Back</a>
+            </div>
+        </div>
+        
+        {% if count > 0 %}
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value">{{ count }}</div>
+                <div class="stat-label">Providers Found</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">{{ providers|selectattr('healthgrades_score')|list|length }}</div>
+                <div class="stat-label">With Ratings</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">{{ providers|selectattr('cigna_in_network')|list|length }}</div>
+                <div class="stat-label">Cigna Status</div>
+            </div>
+        </div>
+        
+        <div class="results-container">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Location</th>
+                            <th>Score</th>
+                            <th>Cigna</th>
+                            <th>Specialties</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for provider in providers %}
+                        <tr>
+                            <td>
+                                <div class="provider-name">{{ provider.name }}</div>
+                                {% if provider.clinic %}
+                                <div class="provider-clinic">{{ provider.clinic }}</div>
+                                {% endif %}
+                                {% if provider.phone %}
+                                <div class="provider-clinic">📞 {{ provider.phone }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="location">
+                                    {{ provider.address }}<br>
+                                    {{ provider.city }}, {{ provider.state }} {{ provider.zip_code }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if provider.healthgrades_score %}
+                                <div class="score {% if provider.healthgrades_score >= 4.0 %}score-high{% elif provider.healthgrades_score >= 3.0 %}score-medium{% else %}score-low{% endif %}">
+                                    {{ "%.1f"|format(provider.healthgrades_score) }}
+                                    <span class="stars">
+                                        {% for i in range(provider.healthgrades_score|int) %}★{% endfor %}
+                                    </span>
+                                </div>
+                                {% if provider.review_count %}
+                                <small style="color: #666;">({{ provider.review_count }} reviews)</small>
+                                {% endif %}
+                                {% else %}
+                                <span style="color: #999;">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if provider.cigna_in_network is not none %}
+                                <span class="cigna-badge {% if provider.cigna_in_network %}cigna-yes{% else %}cigna-no{% endif %}">
+                                    {% if provider.cigna_in_network %}✓ In Network{% else %}✗ Out of Network{% endif %}
+                                </span>
+                                {% if provider.cigna_plans %}
+                                <br><small style="color: #666; font-size: 11px;">{{ provider.cigna_plans|join(', ') }}</small>
+                                {% endif %}
+                                {% else %}
+                                <span class="cigna-badge cigna-unknown">Not checked</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="specialties">
+                                    {% for specialty in provider.specialties %}
+                                    <span class="specialty-tag">{{ specialty }}</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="results-container">
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h2>No providers found</h2>
+                <p>Try adjusting your search criteria or check back later.</p>
+                <a href="/rei" class="btn btn-primary">Try Another Search</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
