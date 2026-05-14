@@ -9,6 +9,10 @@ from dataclasses import dataclass
 from typing import List, Optional, Dict
 import json
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
@@ -47,8 +51,38 @@ class Provider:
         }
 
 
+from scraper import scrape_providers, Provider as ScraperProvider
+
+class RealScraper:
+    """Real scraper using Playwright"""
+    
+    def scrape(self, state: str, sources: List[str], network: Optional[str] = None) -> List[Provider]:
+        """Scrape using real implementation"""
+        # Convert scraper Provider to app Provider
+        raw_providers = scrape_providers(state, sources, network, max_results=50)
+        
+        providers = []
+        for p in raw_providers:
+            providers.append(Provider(
+                name=p.name,
+                clinic=p.clinic,
+                address=p.address,
+                city=p.city,
+                state=p.state,
+                zip_code=p.zip_code,
+                phone=p.phone,
+                specialties=p.specialties,
+                healthgrades_score=p.healthgrades_score,
+                review_count=p.review_count,
+                cigna_in_network=p.cigna_in_network,
+                cigna_plans=p.cigna_plans,
+                source=p.source
+            ))
+        
+        return providers
+
 class MockScraper:
-    """Mock scraper for testing - replace with real implementation"""
+    """Mock scraper for testing - fallback if real scraper fails"""
     
     def scrape(self, state: str, sources: List[str], network: Optional[str] = None) -> List[Provider]:
         """Return mock data for testing"""
@@ -166,7 +200,12 @@ def do_search():
     
     # Perform scrape
     try:
-        scraper = MockScraper()  # Replace with real scraper
+        # Try real scraper first
+        scraper = RealScraper()
+        providers = scraper.scrape(state, sources=sources, network=network)
+    except Exception as e:
+        logger.error(f"Real scraper failed: {e}, falling back to mock")
+        scraper = MockScraper()
         providers = scraper.scrape(state, sources=sources, network=network)
         
         # Store results in session
